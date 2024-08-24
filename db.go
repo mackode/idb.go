@@ -3,13 +3,15 @@ package main
 import (
   "database/sql"
   "fmt"
-  _ "github.com/mattn/go-sqlite3"
 )
 
 func name2id(db *sql.DB, table string, name string) (int, error) {
   query := fmt.Sprintf("INSERT OR IGNORE INTO %s(name) VALUES(?)", table)
   stmt, err := db.Prepare(query)
-  panicOnErr(err)
+  panicOnError(err)
+
+  _, err = stmt.Exec(name)
+  panicOnError(err)
 
   id := -1
 
@@ -23,9 +25,9 @@ func name2id(db *sql.DB, table string, name string) (int, error) {
 func tagMap(db *sql.DB, tagId, fileId int) {
   query := "INSERT OR IGNORE INTO tagmap(tag_id, file_id) VALUES(?, ?)"
   stmt, err := db.Prepare(query)
-  panicOnErr(err)
+  panicOnError(err)
   _, err = stmt.Exec(tagId, fileId)
-  panicOnErr(err)
+  panicOnError(err)
   return
 }
 
@@ -59,12 +61,12 @@ func tagList(db *sql.DB) {
   `
 
   rows, err := db.Query(query)
-  panicOnErr(err)
+  panicOnError(err)
 
   for rows.Next() {
     tag := ""
     err = rows.Scan(&tag)
-    panicOnErr(err)
+    panicOnError(err)
     fmt.Printf("%s\n", tag)
   }
 
